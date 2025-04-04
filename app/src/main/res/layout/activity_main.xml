@@ -5,7 +5,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".MainActivity">
+        tools:context=".MainActivity"
+        android:background="@drawable/background"
+        >
 
     <TextView
             android:layout_width="wrap_content"
@@ -13,6 +15,7 @@
             android:text="My Pokedex"
             android:textSize="24sp"
             android:layout_gravity="center"
+            android:textStyle="bold"
             android:layout_margin="26dp" />
 
     <ListView
@@ -27,6 +30,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="26dp"
+            android:paddingHorizontal="25dp"
+            android:paddingVertical="15dp"
+            android:textAllCaps="true"
+            android:textSize="16sp"
             android:text="Add Pokemon"
             android:layout_gravity="center" />
 

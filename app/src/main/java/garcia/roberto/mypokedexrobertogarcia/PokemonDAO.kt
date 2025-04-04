@@ -10,7 +10,6 @@ object PokemonDAO {
     private val database = Firebase.database.reference
     private val pokemonRef = database.child("pokemons")
 
-    // Save a Pokémon to the database
     fun savePokemon(pokemon: Pokemon, onComplete: (Exception?) -> Unit = {}) {
         val newPokemonRef = pokemonRef.push()
         val pokemonWithId = pokemon.copy(id = newPokemonRef.key ?: "")
@@ -20,7 +19,6 @@ object PokemonDAO {
             }
     }
 
-    // Listen for Pokémon changes
     fun listenForPokemonChanges(onPokemonAdded: (Pokemon) -> Unit) {
         pokemonRef.addChildEventListener(object : SimpleChildEventListener() {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
@@ -29,7 +27,6 @@ object PokemonDAO {
         })
     }
 
-    // Get all Pokémon once
     fun getAllPokemon(onComplete: (List<Pokemon>) -> Unit) {
         pokemonRef.get()
             .addOnSuccessListener { snapshot ->

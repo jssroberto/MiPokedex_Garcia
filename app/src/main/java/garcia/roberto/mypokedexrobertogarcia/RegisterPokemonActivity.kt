@@ -13,6 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
@@ -67,7 +70,6 @@ class RegisterPokemonActivity : AppCompatActivity() {
     }
 
     private fun savePokemon() {
-        var url = ""
         if (imageUri == null) {
             Toast.makeText(this, "Please select an image", Toast.LENGTH_SHORT).show()
             return
@@ -86,11 +88,6 @@ class RegisterPokemonActivity : AppCompatActivity() {
                 override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
                     Log.d("Cloudinary", "Upload successful: $resultData")
                     imageUrl = resultData["secure_url"] as String
-                    Toast.makeText(
-                        this@RegisterPokemonActivity,
-                        "Pokemon saved successfully",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     persistPokemon()
                 }
 
@@ -115,7 +112,7 @@ class RegisterPokemonActivity : AppCompatActivity() {
             }).dispatch()
     }
 
-    private fun persistPokemon(){
+    private fun persistPokemon() {
         val pokemon = Pokemon(
             name = etPokemonName.text.toString(),
             number = etPokemonNumber.text.toString().toInt(),
@@ -124,10 +121,12 @@ class RegisterPokemonActivity : AppCompatActivity() {
 
         PokemonDAO.savePokemon(pokemon) { error ->
             if (error == null) {
-                Toast.makeText(this, "Pokemon saved successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Pokemon: "+ pokemon.name + ", saved successfully", Toast.LENGTH_SHORT)
+                    .show()
                 finish()
             } else {
-                Toast.makeText(this, "Error saving Pokemon: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error saving Pokemon: ${error.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -151,7 +150,12 @@ class RegisterPokemonActivity : AppCompatActivity() {
 
     private fun changeImage(uri: Uri) {
         try {
-            ivPokemonImage.setImageURI(uri)
+            Glide.with(this)
+                .load(uri)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .error(R.drawable.ic_launcher_foreground)
+                .transform(RoundedCorners(16))
+                .into(ivPokemonImage)
             imageUri = uri
         } catch (e: Exception) {
             e.printStackTrace()
@@ -160,9 +164,15 @@ class RegisterPokemonActivity : AppCompatActivity() {
     }
 
     private fun initCloudinary() {
-        val config = HashMap<String, String>()
-        config["cloud_name"] = CLOUD_NAME
-        MediaManager.init(this, config)
+        try {
+            MediaManager.get()
+            Log.d ("Cloudinary", "Cloudinary already initialized: " + MediaManager.get().toString())
+        } catch (e: Exception) {
+            val config = HashMap<String, String>()
+            config["cloud_name"] = CLOUD_NAME
+            MediaManager.init(this, config)
+            Log.d("Cloudinary", "Cloudinary initialized")
+        }
     }
 
     private fun validateFields(): Boolean {

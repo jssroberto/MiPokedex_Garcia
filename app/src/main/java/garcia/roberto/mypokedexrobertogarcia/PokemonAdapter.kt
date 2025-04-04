@@ -8,13 +8,19 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 
 class PokemonAdapter(
     private val context: Context,
-    private val pokemons: List<Pokemon>
+    private var pokemons: List<Pokemon>
 ) : BaseAdapter() {
 
     private val inflater = LayoutInflater.from(context)
+
+    fun updatePokemons(newPokemons: List<Pokemon>) {
+        this.pokemons = newPokemons
+        notifyDataSetChanged()
+    }
 
     override fun getCount(): Int {
         return pokemons.size
@@ -60,8 +66,10 @@ class PokemonAdapter(
 
         Glide.with(context)
             .load(currentPokemon.imageUrl)
+            .placeholder(R.drawable.ic_launcher_foreground)
+            .error(R.drawable.ic_launcher_foreground)
+            .transform( RoundedCorners(16))
             .into(viewHolder.image)
-
         return view
 
     }

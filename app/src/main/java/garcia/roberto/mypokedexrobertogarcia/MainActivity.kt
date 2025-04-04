@@ -12,6 +12,8 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
     private lateinit var btnAddPokemon: Button
     private lateinit var lvPokemon: ListView
+    private lateinit var pokemonAdapter: PokemonAdapter
+    private val pokemonList = mutableListOf<Pokemon>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +31,11 @@ class MainActivity : AppCompatActivity() {
         btnAddPokemon.setOnClickListener {
             navigateRegisterPokemon()
         }
-        setupListView()
+
+        pokemonAdapter = PokemonAdapter(this, pokemonList)
+        lvPokemon.adapter = pokemonAdapter
+
+        setupPokemonUpdates()
 
     }
 
@@ -38,17 +44,23 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun setupListView() {
-        // Setup the ListView with an adapter to display Pokémon
-        val pokemonList = mutableListOf<Pokemon>()
-        val adapter = PokemonAdapter(this, pokemonList)
-        lvPokemon.adapter = adapter
+    private fun setupPokemonUpdates() {
+        PokemonDAO.listenForPokemonChanges { newPokemon ->
+            val existingIndex = pokemonList.indexOfFirst { it.id == newPokemon.id }
+            if (existingIndex >= 0) {
+                pokemonList[existingIndex] = newPokemon
+            } else {
+                pokemonList.add(newPokemon)
+            }
+            pokemonAdapter.updatePokemons(pokemonList) // Updates the entire list (BaseAdapter doesn't support granular updates)
+        }
 
-        // Load Pokémon from the database
+        // Initial load
         PokemonDAO.getAllPokemon { pokemons ->
             pokemonList.clear()
             pokemonList.addAll(pokemons)
-            adapter.notifyDataSetChanged()
+            pokemonAdapter.updatePokemons(pokemonList)
         }
     }
+
 }
